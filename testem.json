@@ -10,8 +10,8 @@
     "test/**/*-spec.js"
   ],
   "test_page": "test/template.mustache",
-  "before_tests": "node_modules/.bin/browserify --extension=.jsx test/shim.js test/**/*-spec.js --transform babelify -d -o test/tests.js",
-  "on_exit": "rm test/tests.js",
+  "before_tests": "node ./test/preTest.js",
+  "on_exit": "node ./test/postTest.js",
   "launch_in_dev": [ "chrome" ],
   "launch_in_ci": [ "phantomjs" ]
 }
