@@ -51,7 +51,7 @@ export default Flux.createStore({
                   })
               );
             });
-        updater.set({[data.resourceName]: request});
+        updater.set({[data.resourceName]: optionsPromise});
         Dispatcher.dispatch(LOAD_OPTIONS, {id, optionsPromise});
       }
     }
