@@ -31,17 +31,17 @@ export default Flux.createStore({
       if (!configuration.API || !configuration.API.options) {
         throw new Error('API endpoint for options not configured.');
       }
-
+      let id = data.fieldId;
+      let optionsPromise = {};
       // inspect internal state first to see if we have already loaded the
       // requested options data
       if (!data.resourceFilter && updater.props[data.resourceName]) {
-        let id = data.fieldId;
-        let optionsPromise = updater.props[data.resourceName];
+        optionsPromise = updater.props[data.resourceName];
         Dispatcher.dispatch(LOAD_OPTIONS, {id, optionsPromise});
       } else {
         let uri = `${configuration.API.options}/${data.resourceName}`;
         let params = {filter: data.resourceFilter};
-        let request = $.getJSON(uri, params)
+        optionsPromise = $.getJSON(uri, params)
             .fail((jqxhr, textStatus, error) => {
               Dispatcher.dispatch(
                   API_COMMUNCATION_ERROR,
@@ -52,6 +52,7 @@ export default Flux.createStore({
               );
             });
         updater.set({[data.resourceName]: request});
+        Dispatcher.dispatch(LOAD_OPTIONS, {id, optionsPromise});
       }
     }
   }
