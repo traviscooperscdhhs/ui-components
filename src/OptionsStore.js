@@ -36,34 +36,22 @@ export default Flux.createStore({
       // requested options data
       if (!data.resourceFilter && updater.props[data.resourceName]) {
         let id = data.fieldId;
-        let options = updater.props[data.resourceName];
-        Dispatcher.dispatch(LOAD_OPTIONS, {id, options});
+        let optionsPromise = updater.props[data.resourceName];
+        Dispatcher.dispatch(LOAD_OPTIONS, {id, optionsPromise});
       } else {
         let uri = `${configuration.API.options}/${data.resourceName}`;
         let params = {filter: data.resourceFilter};
-        let request = $.getJSON(uri, params);
-
-        request.done(resp => {
-          let options = [];
-          let id = data.fieldId;
-          if (resp && resp.responsePayload.result.length) {
-            options = resp.responsePayload.result;
-            if (!data.resourceFilter) {
-              updater.set({[data.resourceName]: options});
-            }            
-          }
-          Dispatcher.dispatch(LOAD_OPTIONS, {id, options});
-        });
-
-        request.fail((jqxhr, textStatus, error) => {
-          Dispatcher.dispatch(
-            API_COMMUNCATION_ERROR,
-            _.merge(data, {
-              hasError: true,
-              errorMessage: 'Error calling options API.'
-            })
-          );
-        });
+        let request = $.getJSON(uri, params)
+            .fail((jqxhr, textStatus, error) => {
+              Dispatcher.dispatch(
+                  API_COMMUNCATION_ERROR,
+                  _.merge(data, {
+                    hasError: true,
+                    errorMessage: 'Error calling options API.'
+                  })
+              );
+            });
+        updater.set({[data.resourceName]: request});
       }
     }
   }

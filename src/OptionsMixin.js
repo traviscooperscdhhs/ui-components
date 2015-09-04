@@ -56,7 +56,13 @@ export default {
     // if a client is sending us new options...
     Dispatcher.register(`${this.props.id}-LOAD-OPTIONS`, (action, data) => {
       if (action === LOAD_OPTIONS && data.id === this.props.id) {
-        this.setState({options: data.options});
+        data.optionsPromise.done(resp => {
+          let options = [];
+          if (resp && resp.responsePayload.result.length) {
+            options = resp.responsePayload.result;
+          }
+          this.setState({options});
+        });
       }
     });
 
