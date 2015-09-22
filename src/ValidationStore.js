@@ -5,12 +5,17 @@ import configuration from './configuration';
 import _ from 'lodash';
 
 let {
+  API_COMMUNCATION_ERROR,
   FIELD_VALUE_CHANGE,
   FIELD_BLUR,
   SESSION_VALUES_LOADED,
   GET_SESSION_VALUES,
   FIELD_VALIDATION_ERROR
 } = constants.actions;
+
+let {
+  VALIDATION_CONFIG_FIELDS
+} = constants;
 
 export default Flux.createStore({
   id: 'ValidationStore',
@@ -57,7 +62,7 @@ export default Flux.createStore({
           rules: _.compact(_.map(data.rules, (enabled, ruleName) => {
             return !enabled ? null : {
               ruleName,
-              config: _.pick(data, ['type', 'name', 'id', 'maxLength', 'required'])
+              config: _.pick(data, VALIDATION_CONFIG_FIELDS)
             };
           }))
         };
@@ -90,7 +95,7 @@ export default Flux.createStore({
         // Error reaching API endpoint, throw generic error
         request.fail(() => {
           Dispatcher.dispatch(
-            API_COMMUNCATION_ERROR ,
+            API_COMMUNCATION_ERROR,
             _.merge(data, {hasError: true , errorMessage: 'Error calling validation API.'})
           );
         });

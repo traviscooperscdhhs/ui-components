@@ -4,12 +4,14 @@ import elements from '../../src/index';
 import Factory from '../../src/Factory';
 import TestUtils from 'react/lib/ReactTestUtils';
 import Workflow from '../../src/Workflow';
+import WorkflowItem from '../../src/WorkflowItem';
 import Flux from 'fluxify';
 import constants from '../../src/constants';
 import Immutable from 'immutable';
 
 let Dispatcher = Flux.dispatcher;
 let fixture = require('../fixtures/workflow-simple.json');
+let longerWorkflow = require('../fixtures/workflow-simple-more-pages.json');
 let childrenFixture = require('../fixtures/workflow-with-children.json');
 
 describe('Workflow', function(){
@@ -28,6 +30,19 @@ describe('Workflow', function(){
       expect(workflow.state.previousPage).toEqual('page2');
       expect(workflow.state.nextPage).not.toBeDefined();
       done();
+    });
+  });
+
+  it('can progress to the next section and update lastSectionCompleted', function(done){
+    let config = longerWorkflow;
+    let component = Factory.build(elements, config, config)[0];
+    let workflow = TestUtils.renderIntoDocument(component);
+    Flux.doAction(constants.actions.WORKFLOW_NEXT_PAGE).then(function(){
+      expect(workflow.state.lastSectionCompleted).toEqual('page3');
+      Flux.doAction(constants.actions.WORKFLOW_NEXT_PAGE).then(function(){
+        expect(workflow.state.lastSectionCompleted).toEqual('page4');
+        done();
+      });
     });
   });
 
@@ -135,6 +150,34 @@ describe('Workflow', function(){
       expect(fromPage2.length).toBe(1);
       expect(fromPage2[0]).toBe('page3');
       expect(fromPage3.length).toBe(0);
+    });
+  });
+
+  describe('WorkflowItem#configure', function(){
+    it('will properly set `nestable` and `unNestable` props for each page', function(){
+      let components = Immutable.fromJS(childrenFixture.components);
+      let schema = Immutable.fromJS(childrenFixture.components);
+      let pageOne = WorkflowItem.configure(schema.get('page1'),{},components);
+      let pageTwo = WorkflowItem.configure(schema.get('page2'),{},components);
+      let pageThree = WorkflowItem.configure(schema.get('page3'),{},components);
+      let pageFour = WorkflowItem.configure(schema.get('page4'),{},components);
+      let pageSix = WorkflowItem.configure(schema.get('page6'),{},components);
+      let pageSeven = WorkflowItem.configure(schema.get('page7'),{},components);
+      let pageFive = WorkflowItem.configure(schema.get('page5'),{},components);
+      expect(pageOne.nestable).toBe(false);
+      expect(pageOne.unNestable).toBe(false);
+      expect(pageTwo.nestable).toBe(true);
+      expect(pageTwo.unNestable).toBe(false);
+      expect(pageThree.nestable).toBe(false);
+      expect(pageThree.unNestable).toBe(true);
+      expect(pageFour.nestable).toBe(true);
+      expect(pageFour.unNestable).toBe(true);
+      expect(pageSix.nestable).toBe(true);
+      expect(pageSix.unNestable).toBe(true);
+      expect(pageSeven.nestable).toBe(true);
+      expect(pageSeven.unNestable).toBe(true);
+      expect(pageFive.nestable).toBe(true);
+      expect(pageFive.unNestable).toBe(false);
     });
   });
 });

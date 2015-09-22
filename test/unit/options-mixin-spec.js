@@ -1,11 +1,10 @@
+import React from 'react';
 import _ from 'lodash';
 import constants from '../../src/constants';
 import Select from '../../src/Select';
-import React from 'react';
 import TestUtils from 'react/lib/ReactTestUtils';
 import Flux, { dispatcher as Dispatcher } from 'fluxify';
 import fixture from '../fixtures/options';
-import OptionsStore from '../../src/OptionsStore';
 import Components from '../../src/main';
 
 let {
@@ -72,9 +71,9 @@ describe('OptionsMixin', () => {
 
     let handler2Id = Dispatcher.register((action, data) => {
       if (action === SEND_OPTIONS) {
+        Dispatcher.unregister(handler2Id);
         expect(data.id).toEqual(fixture.customField.id);
         Dispatcher.dispatch(LOAD_OPTIONS, fixture.customPayload);
-        Dispatcher.unregister(handler2Id);
       }
     });
 
