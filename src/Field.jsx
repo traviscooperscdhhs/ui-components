@@ -115,6 +115,15 @@ class Field extends React.Component {
     return value;
   }
 
+  getInputOptions() {
+    let options = null;
+    if (this.props.options) {
+      options = _.map(this.props.options, opt => <option value={opt.value}
+                                                         key={"option-"+opt.value}>{opt.label}</option>);
+    }
+    return options;
+  }
+
   /**
    * Ensure that value is not greater than specified max.
    * @param {string} value
@@ -187,7 +196,8 @@ class Field extends React.Component {
     let Control = this.getInputControl()
     let props = this.getInputProps();
     let handlers = this.getEventHandlers();
-    return this.props.visible? <Control ref="field" {...props} {...handlers}/> : null;
+    let options = this.getInputOptions();
+    return this.props.visible? <Control ref="field" {...props} {...handlers}>{options}</Control> : null;
   }
 }
 
