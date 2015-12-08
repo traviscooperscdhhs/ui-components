@@ -1,184 +1,160 @@
 import React from 'react';
-import Factory from '../../src/Factory';
-import Components from '../../src/main';
-import EntryList from '../../src/EntryList';
+import elements from '../../src/index';
 import TestUtils from 'react/lib/ReactTestUtils';
 import Immutable from 'immutable';
-import Flux from 'fluxify';
-import {dispatcher as Dispatcher } from 'fluxify';
+import Factory from '../../src/Factory';
 import fixture from '../fixtures/entrylist.json';
 
-const API_URI = '/api/rules';
+const SCHEMA = fixture;
+const mockEntry = {firstName: 'John', lastName: 'Doe', phone: '5554443210'};
 
-// setup the rules endpoint for testing
-Components.configure({API: {validation: API_URI}});
-
-let schema = Immutable.fromJS(fixture.components.myEntryList);
-let model = Immutable.Map(fixture.model);
-let renderer = TestUtils.createRenderer();
-let {
-  APPLICATION_VALIDATE_ENTRY,
-  ENTRYLIST_NEW_ENTRY_VALIDATED,
-  ENTRYLIST_ENTRY_REMOVE,
-  ENTRYLIST_ENTRY_EDIT,
-  ENTRYLIST_NEW_ENTRY_ADD,
-  FIELD_VALUE_CHANGE,
-  FIELD_VALIDATION_ERROR,
-  ENTRYLIST_FORM_SHOW
-} = Components.constants.actions;
-
-function createEntryListWithoutRules() {
-  let config = fixture.components.myEntryList.config;
-  let configWithEntries = EntryList.configure(schema, model);
-  let component = <EntryList {...configWithEntries}/>;
-  renderer.render(component);
-  let renderedComponent = renderer.getRenderOutput();
-  let entrylist = TestUtils.renderIntoDocument(component);
-  return {entrylist, renderedComponent};
+function buildComponent(schema) {
+  let componentBuild = Factory.build(elements, schema, schema)[0];
+  let Component = componentBuild.type;
+  let props = componentBuild.props;
+  return TestUtils.renderIntoDocument(<Component {...props} schema={schema}/>);
 }
 
 describe('EntryList', () => {
-  beforeEach(() => jasmine.Ajax.install());
-  afterEach(() => jasmine.Ajax.uninstall());
 
   it('renders an entrylist', () => {
-    let {renderedComponent} = createEntryListWithoutRules();
-    let entries = renderedComponent.props.children[0].props.children;
-    expect(entries.length).toEqual(fixture.model.medicaidNumbers.length);
+    let component = buildComponent(SCHEMA);
+    let headers = TestUtils.scryRenderedDOMComponentsWithTag(component, 'th');
+    expect(component.props.columns.length).toBe(SCHEMA.config.columns.length);
+    expect(headers.length).toBe(SCHEMA.config.columns.length + 1);
   });
 
-  it('can facilitate removal of entries', (done) => {
-    let {entrylist} = createEntryListWithoutRules();
-    let removeFirstEntry = TestUtils.scryRenderedDOMComponentsWithTag(entrylist, 'a')[1];
-    let handler = Dispatcher.register((action, data) => {
-      if (action === ENTRYLIST_ENTRY_REMOVE) {
-        Dispatcher.unregister(handler);
-        expect(entrylist.state.entries.length).toEqual(fixture.model.medicaidNumbers.length - 1);
-        done();
-      }
-    });
-
-    expect(entrylist.state.entries.length).toEqual(fixture.model.medicaidNumbers.length);
-    TestUtils.Simulate.click(removeFirstEntry);
+  it('should render a configured form when "showForm" is set to "true"', () => {
+    let _schema = Immutable.fromJS(SCHEMA).setIn(['config', 'showForm'], true).toJS();
+    let componentWithForm = buildComponent(_schema);
+    let inputs = TestUtils.scryRenderedDOMComponentsWithTag(componentWithForm, 'input');
+    expect(inputs.length).toBe(3);
   });
 
-  it('can facilitate editing of entries', (done) => {
-    let {entrylist} = createEntryListWithoutRules();
-    let editFirstEntry = TestUtils.scryRenderedDOMComponentsWithTag(entrylist, 'a')[0];
-    let testValue = 'test-value';
-    let editHandler = Dispatcher.register((action, data) => {
-      if (action === ENTRYLIST_ENTRY_EDIT) {
-        let firstInput = TestUtils.scryRenderedDOMComponentsWithTag(entrylist, 'input')[0];
-        let updateEntry = TestUtils.findRenderedDOMComponentWithClass(entrylist, 'btn-default');
-
-        // accept user input
-        TestUtils.Simulate.change(firstInput.getDOMNode(), {target: {value: testValue}});
-
-        // click Update button to update the entry
-        TestUtils.Simulate.click(updateEntry);
-      }
+  it('should add a new entry to the value list when adding a new entry', () => {
+    let mockEvent = {};
+    let component = buildComponent(SCHEMA);
+    component.showForm(mockEvent);
+    expect(mockEvent.component).toBeDefined();
+    expect(mockEvent.component.id).toBe(SCHEMA.config.id);
+    expect(mockEvent.component.schemaUpdates).toEqual({showForm: true, entryIndex: 0});
+    expect(mockEvent.component.modelUpdates).toEqual({
+      [SCHEMA.config.name]: [{firstName: '', lastName: '', phone: ''}]
     });
-
-    let updateHandler = Dispatcher.register((action, data) => {
-      if (action === ENTRYLIST_NEW_ENTRY_ADD) {
-        Dispatcher.unregister(updateHandler);
-        expect(entrylist.state.entry.medicaidNumber).toEqual(testValue);
-        done();
-      }
-    });
-
-    // click Edit link on the first entry and update it
-    TestUtils.Simulate.click(editFirstEntry);
   });
 
-  it('can facilitate adding new entries', (done) => {
-    let {entrylist} = createEntryListWithoutRules();
-    let newEntry = {
-      medicaidNumber: '0509584',
-      npi: '0987654325',
-      enrollmentDate: '01/01/2015',
-      state: 'GA'
+  it('should facilitate editing of entries', () => {
+    let schema = Immutable.fromJS(SCHEMA).setIn(['config', 'value'], [mockEntry]).toJS();
+    let componentWithEntries = buildComponent(schema);
+    let mockEvent = {
+      target: {dataset: {index: 0}}
     };
-    let addNewEntryBtn = TestUtils.findRenderedDOMComponentWithClass(entrylist, 'btn-primary');
-    let addHandler = Dispatcher.register((action, data) => {
-      if (action === ENTRYLIST_FORM_SHOW) {
-        Dispatcher.unregister(addHandler);
-        let addEntry = TestUtils.findRenderedDOMComponentWithClass(entrylist, 'btn-default');
-        expect(entrylist.state.entries.length).toEqual(fixture.model.medicaidNumbers.length);
-        entrylist.setState({entry: newEntry});
-
-        // click button to add the entry
-        TestUtils.Simulate.click(addEntry.getDOMNode());
-      }
+    componentWithEntries.handleEdit(mockEvent);
+    expect(mockEvent.component.id).toBe(schema.config.id);
+    expect(mockEvent.component.schemaUpdates).toEqual({
+      showForm: true,
+      entryIndex: 0
     });
 
-    let saveHandler = Dispatcher.register((action, data) => {
-      if (action === FIELD_VALUE_CHANGE) {
-        Dispatcher.unregister(saveHandler);
-        let comp = fixture.components.myEntryList;
-        expect(data.id).toBe(comp.config.model);
-        expect(data.name).toBe(comp.config.model);
-        expect(data.type).toBe('entrylist');
-        expect(data.value.length).toBe(3);
-        expect(data.latestEntry.medicaidNumber).toBe(newEntry.medicaidNumber);
-        done();
-      }
+    let mockSaveEvent = {};
+    componentWithEntries.saveEntry(mockSaveEvent);
+    expect(mockSaveEvent.component.formId).toEqual(schema.child);
+    expect(mockSaveEvent.component.schemaUpdates).toEqual({
+      showForm: false,
+      entryIndex: null
     });
 
-    jasmine.Ajax
-      .stubRequest(API_URI)
-      .andReturn({
-        responseText: '{"operationStatus": "SUCCESS"}'
-      });
-
-    // click Add New Entry button to show new entry form
-    TestUtils.Simulate.click(addNewEntryBtn);
+    expect(mockSaveEvent.component.modelUpdates).toEqual({
+      firstName: undefined,
+      lastName: undefined,
+      phone: undefined
+    });
   });
 
-  it('can validate entries', (done) => {
-    let {entrylist} = createEntryListWithoutRules();
-    let newEntry = {
-      medicaidNumber: '000348992',
-      npi: '',
-      enrollmentDate: '05/01/2015',
-      state: 'SC'
+  it('should send component data when input values change', () => {
+    let schema = Immutable
+      .fromJS(SCHEMA)
+      .setIn(['config', 'showForm'], true)
+      .setIn(['config', 'entryIndex'], 0)
+      .setIn(['config', 'value'], [mockEntry])
+      .toJS();
+
+    let component = buildComponent(schema);
+    let mockEvent = {
+      component: {
+        modelUpdates: {
+          lastName: 'Foo'
+        }
+      }
     };
-    let addNewEntryBtn = TestUtils.findRenderedDOMComponentWithClass(entrylist, 'btn-primary');
-    let addHandler = Dispatcher.register((action, data) => {
-      if (action === ENTRYLIST_FORM_SHOW) {
-        Dispatcher.unregister(addHandler);
-        let addEntry = TestUtils.findRenderedDOMComponentWithClass(entrylist, 'btn-default');
-        entrylist.setState({entry: newEntry});
-        TestUtils.Simulate.click(addEntry.getDOMNode());
-      }
-    });
 
-    let errorHandler = Dispatcher.register((action, data) => {
-      if (action === FIELD_VALIDATION_ERROR && data.name === 'npi') {
-        Dispatcher.unregister(errorHandler);
-        expect(data.hasError).toBe(true);
-        done();
-      }
-    });
+    let expectedModelUpdates = {
+      [schema.config.name]: [{lastName: 'Foo', firstName: mockEntry.firstName, phone: mockEntry.phone}],
+      lastName: 'Foo'
+    };
 
-    jasmine.Ajax
-      .stubRequest(API_URI)
-      .andReturn({
-        responseText: JSON.stringify({
-          operationStatus: 'FAILURE',
-          operationMessages: [
-            {
-              metadata: {
-                rule: 'required',
-                params: ['npi']
-              },
-              description: 'Field is not valid.'
-            }
-          ]
-        })
-      });
-
-    // click Add New Entry button to show new entry form
-    TestUtils.Simulate.click(addNewEntryBtn);
+    component.handleChange(mockEvent);
+    expect(mockEvent.component.id).toEqual(schema.config.id);
+    expect(mockEvent.component.modelUpdates).toEqual(expectedModelUpdates);
   });
+
+  it('should empty all model values associated with entry on cancel', () => {
+    let schema = Immutable
+      .fromJS(SCHEMA)
+      .setIn(['config', 'showForm'], true)
+      .setIn(['config', 'entryIndex'], 0)
+      .setIn(['config', 'value'], [mockEntry])
+      .toJS();
+
+    let component = buildComponent(schema);
+    let mockEvent = {};
+    let mockResult = {
+      component: {
+        id: schema.config.id,
+        schemaUpdates: {
+          showForm: false,
+          entryIndex: null
+        },
+        modelUpdates: {
+          [schema.config.name]: [],
+          firstName: undefined,
+          lastName: undefined,
+          phone: undefined
+        }
+      }
+    };
+
+    component.cancelEdit(mockEvent);
+    expect(mockEvent).toEqual(mockResult);
+  });
+
+  it('should be able to remove an entry from value list', () => {
+    let schema = Immutable
+      .fromJS(SCHEMA)
+      .setIn(['config', 'value'], [mockEntry])
+      .toJS();
+
+    let component = buildComponent(schema);
+    let mockEvent = {
+      target: {dataset: {index: 0}}
+    };
+
+    let mockResult = {
+      component: {
+        id: schema.config.id,
+        modelUpdates: {
+          [schema.config.name]: []
+        },
+        schemaUpdates: {
+          showForm: false,
+          entryIndex: null
+        }
+      }
+    };
+
+    component.handleRemove(mockEvent);
+    expect(mockEvent.component.schemaUpdates).toEqual(mockResult.component.schemaUpdates);
+    expect(mockEvent.component.modelUpdates).toEqual(mockResult.component.modelUpdates);
+  });
+
 });
