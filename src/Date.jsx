@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import _ from 'lodash';
 import {Input} from 'react-bootstrap';
 import DateTimePicker from 'react-widgets/lib/DateTimePicker';
+import masker from './input-masker';
 import Globalize from 'globalize';
 import globalizeLocalizer from 'react-widgets/lib/localizers/globalize';
 
@@ -21,6 +22,7 @@ class DateField extends React.Component {
   constructor(props) {
     super(props);
     this.handleDateChange = this.handleDateChange.bind(this);
+    this._handleDateWrapperChange = this._handleDateWrapperChange.bind(this);
     this._handleBlur = this._handleBlur.bind(this);
   }
 
@@ -56,7 +58,11 @@ class DateField extends React.Component {
   }
 
   _handleDateWrapperChange(e) {
-    e.component = this.props;
+    let value = e.target.value;
+    if (this.props.formatMask) {
+      value = masker.mask('dateFormat', value)
+    }
+    this.handleDateChange(null, value);
   }
 
   _handleBlur(e) {
