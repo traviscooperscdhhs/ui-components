@@ -66,13 +66,15 @@ class DateField extends React.Component {
   render() {
     let wrapperProps = _.pick(this.props, ['bsStyle', 'label', 'help']);
     return (
-      <Input {...wrapperProps} onChange={this._handleDateWrapperChange}>
-        <DateTimePicker
-          {...this.props}
-          onBlur={this._handleBlur}
-          onChange={this.handleDateChange}
-          value={DateField.getDateValue(this.props.value)}/>
-      </Input>
+      <div  onChange={this._handleDateWrapperChange}>
+        <Input {...wrapperProps}>
+          <DateTimePicker
+            {...this.props}
+            onBlur={this._handleBlur}
+            onChange={this.handleDateChange}
+            value={DateField.getDateValue(this.props.value)}/>
+        </Input>
+      </div>
     );
   }
 };
