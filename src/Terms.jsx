@@ -85,6 +85,7 @@ class Terms extends React.Component {
           disabled={!this.props.termsRead}
           label={this.props.checkboxLabel}
           required={this.props.required}
+          requiredIndicatorPosition={this.props.requiredIndicatorPosition}
           value={this.props.checkboxValue}
           submitValue="attested" />
       </fieldset>
@@ -100,7 +101,8 @@ Terms.propTypes = {
   checkboxLabel: React.PropTypes.string.isRequired,
   className: React.PropTypes.string,
   required: React.PropTypes.bool,
-  termsRead: React.PropTypes.bool
+  termsRead: React.PropTypes.bool,
+  requiredIndicatorPosition: React.PropTypes.string
 };
 
 Terms.defaultProps = {
@@ -111,7 +113,8 @@ Terms.defaultProps = {
   checkboxLabel: '',
   className: '',
   required: true,
-  termsRead: false
+  termsRead: false,
+  requiredIndicatorPosition: ''
 };
 
 export default Terms;

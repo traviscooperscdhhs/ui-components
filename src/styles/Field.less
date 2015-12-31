@@ -21,17 +21,23 @@
     }
   }
 
-  .required {
-    margin-left: @padding-xs-horizontal;
-    color: @brand-danger;
-  }
-
   &.form-inline {
     .radio input[type="radio"],
     .checkbox input[type="checkbox"] {
       margin-right: 5px;
     }
   }
+}
+
+.required {
+  margin-left: @padding-xs-horizontal;
+  color: @brand-danger;
+  margin-right: @padding-xs-horizontal;
+  font-weight: bold;
+}
+
+.required-left .required {
+  margin-left: 0;
 }
 
 .field-description .glyphicon-info-sign{
