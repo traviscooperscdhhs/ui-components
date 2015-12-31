@@ -32,7 +32,7 @@ class FieldLabel extends React.Component {
   }
 
   render() {
-    return (
+    let label = (
       <span>
         {this.props.children}
         {this.props.label}
@@ -40,6 +40,17 @@ class FieldLabel extends React.Component {
         {this.renderDescription()}
       </span>
     );
+    if (this.props.requiredIndicatorPosition === 'left') {
+      label = (
+        <span>
+          {this.props.children}
+          {this.renderRequiredIndicator()}
+          {this.props.label}
+          {this.renderDescription()}
+        </span>
+      )
+    }
+    return label;
   }
 }
 
