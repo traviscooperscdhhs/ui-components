@@ -85,6 +85,7 @@ class Terms extends React.Component {
           disabled={!this.props.termsRead}
           label={this.props.checkboxLabel}
           required={this.props.required}
+          requiredIndicatorPosition={this.props.requiredIndicatorPosition}
           value={this.props.checkboxValue}
           submitValue="attested" />
       </fieldset>
