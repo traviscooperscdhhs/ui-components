@@ -42,7 +42,7 @@ class FieldLabel extends React.Component {
     );
     if (this.props.requiredIndicatorPosition === 'left') {
       label = (
-        <span>
+        <span className="required-left">
           {this.props.children}
           {this.renderRequiredIndicator()}
           {this.props.label}
@@ -62,13 +62,15 @@ FieldLabel.propTypes = {
   description: React.PropTypes.string,
   descriptionTitle: React.PropTypes.string,
   descriptionTrigger: React.PropTypes.string,
-  descriptionPlacement: React.PropTypes.string
+  descriptionPlacement: React.PropTypes.string,
+  requiredIndicatorPosition: React.PropTypes.string
 };
 
 FieldLabel.defaultProps = {
   isFieldGroup: false,
   desriptionTrigger: ['hover', 'focus'],
-  descriptionPlacement: 'top'
+  descriptionPlacement: 'top',
+  requiredIndicatorPosition: ''
 };
 
 export default FieldLabel;
