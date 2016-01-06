@@ -32,9 +32,7 @@ class DateField extends React.Component {
    */
   static getDateValue(value) {
     let dateValue = null;
-    if (value === 'today') {
-      dateValue = new Date();
-    } else if (value) {
+    if (value) {
       dateValue = new Date(value);
     }
 

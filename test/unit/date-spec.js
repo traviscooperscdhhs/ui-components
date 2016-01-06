@@ -23,14 +23,6 @@ describe('Date input', function() {
     expect(result.getDate()).toBe(24);
   });
 
-  it('can parse "today" string as a Date', () => {
-    let today = new Date();
-    let result = DateField.getDateValue('today');
-    expect(result.getFullYear()).toBe(today.getFullYear());
-    expect(result.getMonth()).toBe(today.getMonth());
-    expect(result.getDate()).toBe(today.getDate());
-  });
-
   it('should return "null" if no value is configured', () => {
     let result = DateField.getDateValue(undefined);
     expect(result).toBeNull();
