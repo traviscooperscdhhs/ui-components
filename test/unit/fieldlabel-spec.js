@@ -32,6 +32,23 @@ describe('FieldLabel', () => {
     expect(requiredChar.props.children).toEqual('*');
   });
 
+  it('will render required character to the left', () => {
+    let fixture = {
+      label: 'A label',
+      required: true,
+      requiredIndicatorPosition: 'left'
+    };
+
+    renderer.render(<FieldLabel {...fixture}/>);
+    let output = renderer.getRenderOutput();
+    let requiredChar = output.props.children[1];
+    expect(output.type).toEqual('span');
+    expect(output.props.children[2]).toEqual(fixture.label);
+    expect(requiredChar.type).toEqual('span');
+    expect(requiredChar.props.className).toEqual('required');
+    expect(requiredChar.props.children).toEqual('*');
+  });
+
   it('will render a description', () => {
     let fixture = {
       label: 'A label',

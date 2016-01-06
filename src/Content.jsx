@@ -15,7 +15,7 @@ import setClassNames from 'classnames';
   getClassNames() {
     return setClassNames(
       'page-content',
-      {hidden: !this.props.visible},
+      {hidden: this.props.visible !== undefined ? !this.props.visible : false},
       this.props.className
     );
   }
