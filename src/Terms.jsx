@@ -12,7 +12,6 @@ class Terms extends React.Component {
    constructor() {
     super();
     this.handleScroll = this.handleScroll.bind(this);
-    this.handleChange = this.handleChange.bind(this);
     this.renderLegend = this.renderLegend.bind(this);
     this.renderCheckboxHeader = this.renderCheckboxHeader.bind(this);
   }
@@ -27,19 +26,6 @@ class Terms extends React.Component {
           termsRead: true
         }
       };
-    }
-  }
-
-  handleChange(e) {
-    if (e.component) {
-      if (e.component.schemaUpdates) {
-        e.component = {
-          id: this.props.id,
-          schemaUpdates: {
-            checkboxValue: e.component.schemaUpdates.checked ? 'attested' : null
-          }
-        };
-      }
     }
   }
 
@@ -71,23 +57,18 @@ class Terms extends React.Component {
       <fieldset className="form-group" onChange={this.handleChange}>
         {this.renderLegend()}
         <textarea
-          id={this.props.id}
+          id={`agree-to-terms-${this.props.id}`}
           ref="terms"
           readOnly
           onScroll={this.handleScroll}
           className={this.getClassNames()}
-          value={this.props.value} />
+          value={this.props.terms} />
         {this.renderCheckboxHeader()}
         <Field
-          id={`agree-to-${this.props.id}`}
-          name={`agree-to-${this.props.id}`}
+          {...this.props}
           type="checkbox"
           disabled={!this.props.termsRead}
-          label={this.props.checkboxLabel}
-          required={this.props.required}
-          requiredIndicatorPosition={this.props.requiredIndicatorPosition}
-          value={this.props.checkboxValue}
-          submitValue="attested" />
+          label={this.props.checkboxLabel} />
       </fieldset>
     );
   }
