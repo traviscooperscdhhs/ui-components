@@ -73,7 +73,7 @@ class Field extends React.Component {
       onCut: preventDefault,
       onDrag: preventDefault,
       onDrop: preventDefault,
-      autoComplete: 'off'
+      autoComplete: false
     } : {};
     return _.merge({
       onChange: this.handleChange,
