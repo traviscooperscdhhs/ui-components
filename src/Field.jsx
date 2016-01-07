@@ -73,7 +73,7 @@ class Field extends React.Component {
       onCut: preventDefault,
       onDrag: preventDefault,
       onDrop: preventDefault,
-      autoComplete: 'off'
+      autoComplete: false
     } : {};
     return _.merge({
       onChange: this.handleChange,
@@ -224,8 +224,7 @@ Field.defaultProps = {
   visible: true,
   mask: '',
   forceManualInput: false,
-  hasError: false,
-  autoComplete: true
+  hasError: false
 };
 
 export default Field;
