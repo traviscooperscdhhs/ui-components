@@ -224,7 +224,8 @@ Field.defaultProps = {
   visible: true,
   mask: '',
   forceManualInput: false,
-  hasError: false
+  hasError: false,
+  autoComplete: true
 };
 
 export default Field;
