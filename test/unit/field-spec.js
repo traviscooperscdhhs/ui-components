@@ -391,6 +391,6 @@ describe('Field', () => {
     let component = TestUtils.renderIntoDocument(<Field {...fixture}/>);
     let input = TestUtils.findRenderedDOMComponentWithTag(component, 'input');
     let dom = React.findDOMNode(input);
-    expect(input.props.autoComplete).toBe('off');
+    expect(input.props.autoComplete).toBe(false);
   });
 });
