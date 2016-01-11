@@ -225,7 +225,7 @@ class EntryList extends React.Component {
           <thead>
             <tr>
               {this.props.columns.map(col => <th key={col.dataKey}>{col.header}</th>)}
-              <th key="actions" colSpan="2">Actions</th>
+              <th key="actions" colSpan="2">Action</th>
             </tr>
           </thead>
           <tbody>
