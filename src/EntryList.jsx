@@ -197,7 +197,7 @@ class EntryList extends React.Component {
 
   renderEmptyText() {
     if (!this.props.value.length) {
-      return <tr><td colSpan={this.props.columns.length + 2}>{this.props.emptyText}</td></tr>;
+      return <tr><td colSpan={this.props.columns.length + 2}><strong>{this.props.emptyText}</strong></td></tr>;
     }
   }
 
